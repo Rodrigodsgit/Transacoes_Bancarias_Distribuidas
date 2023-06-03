@@ -33,19 +33,21 @@ clock1 = VectorClock()
 clock2 = VectorClock()
 
 # Incrementando o relógio 1
-clock1.increment('A')
+clock1.increment('Nubank')
+clock1.increment('Nubank')
 
 # Incrementando o relógio 2
-clock2.increment('B')
+clock2.increment('Nubank')
 
 # Comparando os relógios
 result = clock1.compare(clock2)
 print(result)
 
 # Sincronizando os relógios
-clock1.sync(clock2)
-result = clock1.compare(clock2)
-print(result)
 
 print(clock1.value())
 print(clock2.value())
+
+# Se clock1 < clock2 > 0
+# se clock1 > clock2 < 0
+# Se clock1 = clock2 = 0
