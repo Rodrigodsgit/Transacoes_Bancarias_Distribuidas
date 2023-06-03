@@ -51,3 +51,42 @@ print(clock2.value())
 # Se clock1 < clock2 > 0
 # se clock1 > clock2 < 0
 # Se clock1 = clock2 = 0
+
+
+
+from flask import Flask, jsonify, request
+import threading
+from time import sleep
+
+app = Flask(_name_)
+
+# Dicionário para controlar o status de bloqueio por ID
+bloqueio_por_id = {}
+
+@app.route('/endpoint', methods=['POST'])
+def endpoint():
+    id = request.json.get('id')
+
+    # Verifica se o ID está bloqueado
+    if id in bloqueio_por_id and bloqueio_por_id[id].locked():
+        return jsonify({'message': 'Operação em andamento. Tente novamente mais tarde.'}), 409
+
+    # Inicia o bloqueio para o ID
+    bloqueio_por_id[id] = threading.Lock()
+    bloqueio_por_id[id].acquire()
+    sleep(20)
+
+    try:
+        # Lógica de processamento do POST aqui
+        # ...
+
+        # Liberar o bloqueio após o processamento
+        bloqueio_por_id[id].release()
+        return jsonify({'message': 'POST processado com sucesso.'}), 200
+    except Exception as e:
+        # Em caso de erro, liberar o bloqueio também
+        bloqueio_por_id[id].release()
+        return jsonify({'message': 'Erro no processamento do POST.'}), 500
+
+if _name_ == '_main_':
+    app.run()

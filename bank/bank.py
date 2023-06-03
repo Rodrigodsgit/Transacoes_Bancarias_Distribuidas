@@ -21,7 +21,8 @@ def register_user():
                 "password1": request_data.get('password1'),
                 "name2": request_data.get('name2'),
                 "email2": request_data.get('email2'),
-                "password2": request_data.get('password2')
+                "password2": request_data.get('password2'),
+                "balance": 0
             }
             data[cpf] = new_account
             return jsonify({"success": True})
