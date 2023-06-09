@@ -9,7 +9,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 def check_balance(account, value):
     accountBalance = account.get("balance")
-    print(accountBalance)
     if accountBalance >= value:
         return True
     else:
@@ -39,7 +38,6 @@ def register_user():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-
 @app.route('/signIn', methods=['POST'])
 def sign_in():
     try:
@@ -62,10 +60,9 @@ def sign_in():
                 return jsonify({"success": True})
 
         return jsonify({"success": False})
-
+    
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-
 
 @app.route('/trasactionIn', methods=['POST'])
 def transaction():
@@ -75,7 +72,6 @@ def transaction():
         account = data.get(cpf)
         accountRec = data.get(cpfRec)
         value = float(request.json.get('value'))
-        print(check_balance(account, value))
         if (check_balance(account, value)):
             account['balance'] -=  value
             accountRec['balance'] += value
@@ -85,16 +81,30 @@ def transaction():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-        
-
 @app.route('/payment', methods=['POST'])
 def payment():
-    pass
-
+    try:
+        cpf = request.json.get('cpf')
+        value = request.json.get('value')
+        account = data.get(cpf)
+        if (check_balance(account, value)):
+            account['balance'] -=  value
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "value insufficient"})
+    except Exception as e:
+        return jsonify({"sucess": False, "error": str(e)})
+    
 @app.route('/deposit', methods=['POST'])
 def deposit():
-    pass
-
+    try:
+        cpf = request.json.get('cpf')
+        value = request.json.get('value')
+        account = data.get(cpf)
+        account['balance'] += value
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 if __name__ == '__main__':
     
     door = int(input("Enter the bank port: "))
