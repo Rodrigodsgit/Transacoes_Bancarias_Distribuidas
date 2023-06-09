@@ -7,6 +7,14 @@ data = {}
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+def check_balance(account, value):
+    accountBalance = account.get("balance")
+    print(accountBalance)
+    if accountBalance >= value:
+        return True
+    else:
+        return False
+
 @app.route('/registerUser', methods=['POST'])
 def register_user():
     try:
@@ -22,7 +30,7 @@ def register_user():
                 "name2": request_data.get('name2'),
                 "email2": request_data.get('email2'),
                 "password2": request_data.get('password2'),
-                "balance": 0
+                "balance": 100
             }
             data[cpf] = new_account
             return jsonify({"success": True})
@@ -59,19 +67,31 @@ def sign_in():
         return jsonify({"success": False, "error": str(e)})
 
 
-@app.route('/getUsers', methods=['GET'])
-def get_users():
-    pass
-
-@app.route('/trasaction', methods=['POST'])
+@app.route('/trasactionIn', methods=['POST'])
 def transaction():
-    pass
+    try:
+        cpf = request.json.get('cpf')
+        cpfRec = request.json.get('cpfRec')
+        account = data.get(cpf)
+        accountRec = data.get(cpfRec)
+        value = float(request.json.get('value'))
+        print(check_balance(account, value))
+        if (check_balance(account, value)):
+            account['balance'] -=  value
+            accountRec['balance'] += value
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "value insufficient"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+        
 
 @app.route('/payment', methods=['POST'])
 def payment():
     pass
 
-@app.route('/route', methods=['POST'])
+@app.route('/deposit', methods=['POST'])
 def deposit():
     pass
 

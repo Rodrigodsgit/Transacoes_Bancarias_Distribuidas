@@ -18,3 +18,11 @@ Formato /signIn
     "email": "maria@gmail.com",
     "password": "12345"
 }
+
+Formato /trasactionIn
+
+{
+    "cpf": 00000000000,
+    "cpfRec": 00000000001,
+    "value": 10
+}
