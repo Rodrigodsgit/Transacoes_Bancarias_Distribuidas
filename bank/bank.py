@@ -2,10 +2,17 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 import threading
+import requests
 
+global name
 data = {}
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+session = [
+    "http://127.0.0.1:5001",
+    "http://127.0.0.1:5002",
+    "http://127.0.0.1:5003"
+]
 
 def check_balance(account, value):
     accountBalance = account.get("balance")
@@ -13,6 +20,25 @@ def check_balance(account, value):
         return True
     else:
         return False
+    
+@app.route('/balanceValid', methods=['POST'])
+def balance_Isvalid():
+    try:
+        cpf = request.json.get('cpf')
+        value = request.json.get('value')
+        account = data.get(cpf)
+        return jsonify({"success": check_balance(account,value)})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+    
+@app.route('/balance', methods=['POST'])
+def balanced():
+    try:
+        cpf = request.json.get('cpf')
+        account = data.get(cpf)
+        return jsonify({"balance": account.get('balance')})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/registerUser', methods=['POST'])
 def register_user():
@@ -105,8 +131,88 @@ def deposit():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-if __name__ == '__main__':
+
+@app.route('/transactionEx', methods=['POST'])
+def transactionEx():
+    try:
+        banks = request.json.get('banks')
+        destiny = request.json.get('destiny')
+        cpf = request.json.get('cpf')
+        validation = []
+        url = None
+        for bank in banks:
+            if bank[0] == "bankA":
+                url = session[0]
+            elif bank[0] == "bankB":
+                url = session[1]
+            elif bank[0] == "bankC":
+                url = session[2]
+            
+            data = {
+                "cpf": bank[1],
+                "value": bank[4]
+            
+            }
+            url = url + "/balanceValid"
+            response = requests.post(url, json=data)
+            if response.status_code == 200:
+                response_data = response.json()
+                success = response_data.get('success')
+                validation.append(success)
+            else:
+                print('Erro:', response.status_code)
+
+        result = all(validation)
+        if result:
+            transfer = 0
+            for bank in banks:
+                if bank[0] == "bankA":
+                    url = session[0]
+                elif bank[0] == "bankB":
+                    url = session[1]
+                elif bank[0] == "bankC":
+                    url = session[2]
+                
+                data = {
+                    "cpf": bank[1],
+                    "value": bank[4]
+                
+                }
+                url = url + "/payment"
+                response = requests.post(url, json=data)
+                if response.status_code == 200:
+                    response_data = response.json()
+                    #success = response_data.get('success')
+                    print(response_data)
+                else:
+                    print('Erro:', response.status_code)
+                
+                transfer += bank[4]
+            
+            if destiny == "bankA":
+                url = session[0]
+            elif destiny == "bankB":
+                url = session[1]
+            elif destiny == "bankC":
+                url = session[2]
+            
+            url = url + "/deposit"
+            data = {
+                "cpf": cpf,
+                "value": transfer
+            }
+            response = requests.post(url, json=data)
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "value insufficient"})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
     
+
+
+
+if __name__ == '__main__':
     door = int(input("Enter the bank port: "))
     t1 = threading.Thread(target=app.run, kwargs={'host':'0.0.0.0','port': door})
     t1.start()

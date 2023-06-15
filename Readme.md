@@ -33,3 +33,15 @@ Formato /deposit
     "cpf": 10000000000,
     "value": 10
 }
+
+Formato /trasactionEx
+
+{
+    "banks":[
+        ["bankA", 10000000000, "pedro@gmail.com", 12345, 10], 
+        ["bankB", 10000000000, "pedro@gmail.com", 12345, 20]
+    ]
+    "destiny": "bankC"
+    "cpf": 10000000000
+}
+
