@@ -156,7 +156,7 @@ def payment():
         
         try:
             cpf = request.json.get('cpf')
-            value = request.json.get('value')
+            value = float(request.json.get('value'))
             account = data.get(cpf)
             if (check_balance(account, value)):
                 account['balance'] -=  value

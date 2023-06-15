@@ -9,7 +9,7 @@ export function Home() {
             <Link to={'/deposit'} className='font-bold text-2xl border-b-4 border-black rounded-lg'>DEPÓSITO</Link>
         </div>  
         <div className='py-4'>
-            <Link to={'/pagamento'} className='font-bold text-2xl border-b-4 border-black rounded-lg'>PAGAMENTO</Link>
+            <Link to={'/payment'} className='font-bold text-2xl border-b-4 border-black rounded-lg'>PAGAMENTO</Link>
         </div>  
         <div className='py-4'>
             <Link to={'/transIn'} className='font-bold text-2xl border-b-4 border-black rounded-lg'>TRANSFERÊNCIA</Link>
