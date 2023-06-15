@@ -3,8 +3,14 @@ from flask_cors import CORS
 import json
 import threading
 import requests
+from time import sleep
+from paxos import PaxosWithVectorClocks
 
 global name
+paxos = PaxosWithVectorClocks(3,0)
+paxos.add_process(0)
+paxos.add_process(1)
+paxos.add_process(2)
 data = {}
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -13,6 +19,7 @@ session = [
     "http://127.0.0.1:5002",
     "http://127.0.0.1:5003"
 ]
+bloqueio_por_id = {}
 
 def check_balance(account, value):
     accountBalance = account.get("balance")
@@ -92,34 +99,73 @@ def sign_in():
 
 @app.route('/trasactionIn', methods=['POST'])
 def transaction():
-    try:
-        cpf = request.json.get('cpf')
-        cpfRec = request.json.get('cpfRec')
-        account = data.get(cpf)
-        accountRec = data.get(cpfRec)
-        value = float(request.json.get('value'))
-        if (check_balance(account, value)):
-            account['balance'] -=  value
-            accountRec['balance'] += value
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "value insufficient"})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+
+    id = request.json.get('cpf')
+    value = float(request.json.get('value'))
+    process = 0
+
+    accepted_value = paxos.propose(process, value)
+
+    if accepted_value is not None:
+        paxos.learn(accepted_value)
+        if id in bloqueio_por_id and bloqueio_por_id[id].locked():
+            return jsonify({'message': 'Operação em andamento. Tente novamente mais tarde.'}), 409
+    
+        bloqueio_por_id[id] = threading.Lock()
+        bloqueio_por_id[id].acquire()
+        sleep(2)
+        try:
+            cpf = request.json.get('cpf')
+            cpfRec = request.json.get('cpfRec')
+            account = data.get(cpf)
+            accountRec = data.get(cpfRec)
+            if (check_balance(account, value)):
+                account['balance'] -=  value
+                accountRec['balance'] += value
+                bloqueio_por_id[id].release()
+                return jsonify({"success": True})
+            else:
+                bloqueio_por_id[id].release()
+                return jsonify({"success": False, "error": "value insufficient"})
+        except Exception as e:
+            bloqueio_por_id[id].release()
+            return jsonify({"success": False, "error": str(e)})
+        
+    return jsonify({"success": False, "error": "paxos error"})
 
 @app.route('/payment', methods=['POST'])
 def payment():
-    try:
-        cpf = request.json.get('cpf')
-        value = request.json.get('value')
-        account = data.get(cpf)
-        if (check_balance(account, value)):
-            account['balance'] -=  value
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "value insufficient"})
-    except Exception as e:
-        return jsonify({"sucess": False, "error": str(e)})
+
+    value = float(request.json.get('value'))
+    process = 1
+    accepted_value = paxos.propose(process, value)
+    if accepted_value is not None:   
+        paxos.learn(accepted_value)
+        id = request.json.get('cpf')
+
+        if id in bloqueio_por_id and bloqueio_por_id[id].locked():
+            return jsonify({'message': 'Operação em andamento. Tente novamente mais tarde.'}), 409
+        
+        bloqueio_por_id[id] = threading.Lock()
+        bloqueio_por_id[id].acquire()
+        sleep(2)
+        
+        try:
+            cpf = request.json.get('cpf')
+            value = request.json.get('value')
+            account = data.get(cpf)
+            if (check_balance(account, value)):
+                account['balance'] -=  value
+                bloqueio_por_id[id].release()
+                return jsonify({"success": True})
+            else:
+                bloqueio_por_id[id].release()
+                return jsonify({"success": False, "error": "value insufficient"})
+        except Exception as e:
+            bloqueio_por_id[id].release()
+            return jsonify({"sucess": False, "error": str(e)})
+        
+    return jsonify({"success": False, "error": "paxos error"})
     
 @app.route('/deposit', methods=['POST'])
 def deposit():
@@ -134,37 +180,25 @@ def deposit():
 
 @app.route('/transactionEx', methods=['POST'])
 def transactionEx():
-    try:
+    process = 2
+    accepted_value = paxos.propose(process, 100)
+    if accepted_value is not None: 
+        paxos.learn(accepted_value)
         banks = request.json.get('banks')
-        destiny = request.json.get('destiny')
-        cpf = request.json.get('cpf')
-        validation = []
-        url = None
-        for bank in banks:
-            if bank[0] == "bankA":
-                url = session[0]
-            elif bank[0] == "bankB":
-                url = session[1]
-            elif bank[0] == "bankC":
-                url = session[2]
-            
-            data = {
-                "cpf": bank[1],
-                "value": bank[4]
-            
-            }
-            url = url + "/balanceValid"
-            response = requests.post(url, json=data)
-            if response.status_code == 200:
-                response_data = response.json()
-                success = response_data.get('success')
-                validation.append(success)
-            else:
-                print('Erro:', response.status_code)
-
-        result = all(validation)
-        if result:
-            transfer = 0
+        id = banks[0][1]
+        if id in bloqueio_por_id and bloqueio_por_id[id].locked():
+            bloqueio_por_id[id].release()
+            return jsonify({'message': 'Operação em andamento. Tente novamente mais tarde.'}), 409
+        
+        bloqueio_por_id[id] = threading.Lock()
+        bloqueio_por_id[id].acquire()
+        sleep(2)
+        try:
+            banks = request.json.get('banks')
+            destiny = request.json.get('destiny')
+            cpf = request.json.get('cpf')
+            validation = []
+            url = None
             for bank in banks:
                 if bank[0] == "bankA":
                     url = session[0]
@@ -178,37 +212,65 @@ def transactionEx():
                     "value": bank[4]
                 
                 }
-                url = url + "/payment"
+                url = url + "/balanceValid"
                 response = requests.post(url, json=data)
                 if response.status_code == 200:
                     response_data = response.json()
-                    #success = response_data.get('success')
-                    print(response_data)
+                    success = response_data.get('success')
+                    validation.append(success)
                 else:
                     print('Erro:', response.status_code)
-                
-                transfer += bank[4]
-            
-            if destiny == "bankA":
-                url = session[0]
-            elif destiny == "bankB":
-                url = session[1]
-            elif destiny == "bankC":
-                url = session[2]
-            
-            url = url + "/deposit"
-            data = {
-                "cpf": cpf,
-                "value": transfer
-            }
-            response = requests.post(url, json=data)
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "value insufficient"})
 
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
-    
+            result = all(validation)
+            if result:
+                transfer = 0
+                for bank in banks:
+                    if bank[0] == "bankA":
+                        url = session[0]
+                    elif bank[0] == "bankB":
+                        url = session[1]
+                    elif bank[0] == "bankC":
+                        url = session[2]
+                    
+                    data = {
+                        "cpf": bank[1],
+                        "value": bank[4]
+                    
+                    }
+                    url = url + "/payment"
+                    response = requests.post(url, json=data)
+                    if response.status_code == 200:
+                        response_data = response.json()
+                        print(response_data)
+                    else:
+                        print('Erro:', response.status_code)
+                    
+                    transfer += bank[4]
+                
+                if destiny == "bankA":
+                    url = session[0]
+                elif destiny == "bankB":
+                    url = session[1]
+                elif destiny == "bankC":
+                    url = session[2]
+                
+                url = url + "/deposit"
+                data = {
+                    "cpf": cpf,
+                    "value": transfer
+                }
+                response = requests.post(url, json=data)
+                bloqueio_por_id[id].release()
+                return jsonify({"success": True})
+            else:
+                bloqueio_por_id[id].release()
+                return jsonify({"success": False, "error": "value insufficient"})
+
+        except Exception as e:
+            bloqueio_por_id[id].release()
+            return jsonify({"success": False, "error": str(e)})
+    bloqueio_por_id[id].release()
+    return jsonify({"success": False, "error": "paxos error"})
 
 
 
