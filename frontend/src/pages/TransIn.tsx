@@ -9,37 +9,38 @@ export function TransIn() {
     const navigate  = useNavigate();
     const toast = useToast();
 
-    async function handleSignIn(event: FormEvent){
-        event.preventDefault()
-        try {
-          axios({
-            method: 'post',
-            url: `http://127.0.0.1:5001/trasactionIn`,
-            data:{
-              cpf: localStorage.getItem("cpf"),
-              cpfRec: cpfRec,
-              value: value
-
-            }
-            }).then(function (response){
-              if (response.data.success){
-                navigate('/home', { replace: true })
-              }
-              else{
-                toast({
-                    title: 'Non-existent identification.',
-                    description: "Confirm your credentials",
-                    status: 'error',
-                    duration: 9000,
-                    isClosable: true,
-                  })
-            }
-              
-        })
-        } catch (error) {
-          console.log(error);
+    async function handleSignIn(event: FormEvent) {
+      event.preventDefault();
+      try {
+        const response = await axios.post('http://127.0.0.1:5001/trasactionIn', {
+          cpf: localStorage.getItem("cpf"),
+          cpfRec: cpfRec,
+          value: value
+        });
+    
+        if (response.data.success) {
+          navigate('/home', { replace: true });
+        } else {
+          toast({
+            title: 'Non-existent identification.',
+            description: 'Confirm your credentials',
+            status: 'warning',
+            duration: 9000,
+            isClosable: true
+          });
         }
+      } catch (error) {
+        console.log(error);
+        toast({
+          title: 'Transfer in progress.',
+          description: 'Action unavailable at the moment',
+          status: 'error',
+          duration: 9000,
+          isClosable: true
+        });
       }
+    }
+    
   
   return (
     <div className="flex items-center justify-center bg-gray-200 h-full w-full">

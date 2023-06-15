@@ -190,6 +190,7 @@ def transactionEx():
     if accepted_value is not None: 
         paxos.learn(accepted_value)
         banks = request.json.get('banks')
+        print(banks)
         id = banks[0][1]
         if id in bloqueio_por_id and bloqueio_por_id[id].locked():
             bloqueio_por_id[id].release()
@@ -202,6 +203,9 @@ def transactionEx():
             banks = request.json.get('banks')
             destiny = request.json.get('destiny')
             cpf = request.json.get('cpf')
+            print(banks)
+            print(destiny)
+            print(cpf)
             validation = []
             url = None
             for bank in banks:
@@ -214,7 +218,7 @@ def transactionEx():
                 
                 data = {
                     "cpf": bank[1],
-                    "value": bank[4]
+                    "value": float(bank[4])
                 
                 }
                 url = url + "/balanceValid"
@@ -227,6 +231,8 @@ def transactionEx():
                     print('Erro:', response.status_code)
 
             result = all(validation)
+            print(validation)
+            print(result)
             if result:
                 transfer = 0
                 for bank in banks:
@@ -239,7 +245,7 @@ def transactionEx():
                     
                     data = {
                         "cpf": bank[1],
-                        "value": bank[4]
+                        "value": float(bank[4])
                     
                     }
                     url = url + "/payment"
@@ -250,7 +256,7 @@ def transactionEx():
                     else:
                         print('Erro:', response.status_code)
                     
-                    transfer += bank[4]
+                    transfer += float(bank[4])
                 
                 if destiny == "bankA":
                     url = session[0]
