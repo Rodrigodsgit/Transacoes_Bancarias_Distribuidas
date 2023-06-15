@@ -76,10 +76,14 @@ def sign_in():
     try:
         request_data = request.get_json()
         cpf = request_data.get('cpf')
+        print(cpf)
         account = data.get(cpf, False)
+        print(account)
         if account:
             email_form = request_data.get('email')
             password_form = request_data.get('password')
+            print(email_form)
+            print(password_form)
 
             email_data1 = account.get('email1')
             password_data1 = account.get('password1')
@@ -171,8 +175,9 @@ def payment():
 def deposit():
     try:
         cpf = request.json.get('cpf')
-        value = request.json.get('value')
+        value = float(request.json.get('value'))
         account = data.get(cpf)
+        print(account)
         account['balance'] += value
         return jsonify({"success": True})
     except Exception as e:
