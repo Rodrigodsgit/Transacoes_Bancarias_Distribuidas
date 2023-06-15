@@ -58,7 +58,7 @@ from flask import Flask, jsonify, request
 import threading
 from time import sleep
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 # Dicionário para controlar o status de bloqueio por ID
 bloqueio_por_id = {}
@@ -88,6 +88,9 @@ def endpoint():
         bloqueio_por_id[id].release()
         return jsonify({'message': 'Erro no processamento do POST.'}), 500
 
-if _name_ == '_main_':
+if __name__ == '__main__':
+    print("funcionando")
     app.run()
+    print("funcionando")
+
 
