@@ -65,13 +65,13 @@ Formato /trasactionEx
 
 # Introdução 🎉
 
-Com o crescente aumento do uso de carros elétricos nas cidades, a demanda por postos de recarga tem se tornado uma preocupação para governos e empresas. O gerenciamento de filas em postos de recarga é um problema real, que pode levar a congestionamentos e atrasos, o que pode afetar negativamente a experiência do usuário.
+Os avanços na tecnologia e a crescente popularidade dos dispositivos móveis mudaram drasticamente a maneira como os clientes interagem com os serviços bancários. No Brasil, o lançamento do Pix revolucionou o negócio financeiro, proporcionando uma solução flexível, segura e inclusiva para pagamentos, depósitos e transferências de valores. Desde sua implantação, o Pix trouxe benefícios significativos para a vida dos brasileiros, sendo uma alternativa eficaz aos meios de pagamento tradicionais.
 
-Para resolver essa questão, sua empresa startup foi contratada para desenvolver um sistema inteligente de carregamento de veículos elétricos. A ideia era criar uma aplicação capaz de orientar os motoristas a partir de um certo nível crítico de carga da bateria, distribuindo a demanda entre os pontos de recarga disponíveis e reduzindo o tempo necessário para a recarga dos veículos.
+Diante dessa situação, o governo de um país sem banco central tem interesse em desenvolver um sistema semelhante ao Pix no Brasil. O objetivo é criar uma solução que permita a criação de contas bancárias para que os clientes possam realizar transações financeiras de forma distribuída, possibilitando pagamentos, depósitos e transferências entre diferentes contas bancárias sem a necessidade de uma entidade central.
 
-A aplicação desenvolvida pela sua equipe utiliza a linguagem Python e utiliza a comunicação MQTT entre os postos de recarga e nevoas, além de HTTP entre carros e nevoas. O sistema acompanha as filas de espera em cada posto de recarga, identifica os pontos disponíveis e direciona os motoristas para os postos de recarga mais próximos e com menor tempo de espera.
+Em resposta a esta necessidade, foi desenvolvido um protótipo de solução para este desafio. Neste projeto, exploraremos métricas e requisitos fundamentais para o desenvolvimento de sistemas distribuídos, com foco em questões como comunicação segura entre servidores bancários, transações atômicas garantidas e proteção contra movimentação de valores inexistentes ou gastos duplos.
 
-Para garantir o desempenho da aplicação, sua equipe adotou uma infraestrutura distribuída, que permite reduzir os atrasos e o excesso de dados enviados para a nuvem. O resultado é um sistema eficiente, capaz de gerenciar as filas de espera em postos de recarga de forma inteligente e em tempo real, tornando o processo de recarga de carros elétricos mais conveniente para os motoristas e incentivando o uso desses veículos nas cidades.
+Este relatório apresentará as soluções propostas e as tecnologias utilizadas para implementar os sistemas distribuídos exigidos pelos países relevantes. Além disso, analisaremos os desafios enfrentados e as estratégias adotadas para garantir a segurança e a confiabilidade das transações financeiras. Por fim, avaliaremos o potencial dessa solução distribuída para atender as necessidades e objetivos do país, permitindo o desenvolvimento de um sistema semelhante ao Pix no Brasil mesmo sem um banco central.
 
 </div>
 
