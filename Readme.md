@@ -79,31 +79,22 @@ Este relatório apresentará as soluções propostas e as tecnologias utilizadas
 
 # Conceitos & Metodologia 📚
 
-<div id="diagrama" style="display: inline_block" align="center">
-		<img src="assets/Diagrama Geral.jpg"/>
-		Diagrama Geral.
-</div>
 	
-O sistema foi desenvolvido seguindo uma arquitetura de microsserviços, onde cada componente é responsável por uma funcionalidade específica. A aplicação é dividida em quatro partes principais: o servidor, o GasStation, a Fog e o Car.
+A metodologia adotada para o desenvolvimento do sistema de pagamentos distribuídos, baseado nos códigos fornecidos, segue uma abordagem orientada a microsserviços, onde cada componente desempenha uma função específica. A aplicação é dividida em duas partes principais: o componente Bank e o componente PaxosWithVectorClocks.
 
-O servidor é a peça central do sistema e é responsável por gerenciar as conexões entre os componentes e o fluxo de dados entre eles. Para isso, foi utilizado uma imagem docker que inicializa um broker Mosquitto para comunicação MQTT.
+O componente Bank representa a API de um banco e é responsável por oferecer os serviços financeiros, como transferências, pagamentos e depósitos. Cada instância do Bank é tratada como um banco independente no sistema distribuído. Essa abordagem permite a escalabilidade horizontal do sistema, onde novas instâncias do Bank podem ser adicionadas conforme a demanda aumenta.
 
-O GasStation representa os postos de recarga de carros elétricos. Cada posto envia informações sobre a fila de recarregamento para o broker MQTT. Isso permite que a Fog, que é um cliente inscrito nos tópicos do broker, receba as informações em tempo real e possa direcionar os motoristas para os postos mais próximos e com menor tempo de espera.
+Por outro lado, o componente PaxosWithVectorClocks implementa o algoritmo de Paxos, combinado com relógios vetoriais, para garantir o consenso entre os bancos no sistema distribuído. O algoritmo de Paxos permite que os bancos cheguem a um acordo sobre os valores propostos em cada transação, mesmo em situações de falhas ou atrasos na comunicação. Os relógios vetoriais são utilizados para manter a consistência e a ordem das transações, registrando o conhecimento local do tempo em relação aos outros bancos.
 
-A Fog é a parte do sistema responsável por gerenciar as solicitações dos motoristas e direcioná-los para os postos de recarga disponíveis. A Fog também funciona como um servidor, pois possui rotas para o acesso do carro via API REST.
+A interação entre os componentes ocorre por meio de troca de mensagens. O Bank se comunica com outros bancos por meio de requisições e respostas HTTP, permitindo a realização de transações e a manutenção da consistência dos saldos das contas. O componente PaxosWithVectorClocks é responsável por enviar mensagens de preparação (prepare) e aceitação (accept) entre os bancos, a fim de chegar a um consenso sobre os valores propostos. Além disso, o aprendizado (learn) é utilizado para disseminar o valor aceito para os demais bancos.
 
-O Car representa o carro elétrico e, quando sua bateria está ficando descarregada, faz uma requisição HTTP para a Fog mais próxima dele para saber qual o posto de recarga mais indicado para sua situação.
+A arquitetura do sistema permite que cada banco (instância do Bank) seja tratado como um componente independente, possibilitando o desenvolvimento e teste individual de cada banco. Essa abordagem facilita a manutenção e aprimoramento do sistema como um todo, além de proporcionar uma escalabilidade eficiente em termos de adição de novos bancos.
 
-Por fim, o frontend feito em React permite a fácil visualização do mapa com os servidores, postos de recarga e carros em tempo real. O usuário pode ver onde estão os postos de recarga e a disponibilidade deles, bem como a localização dos carros elétricos na cidade.
-
-Essa arquitetura de microsserviços permite que cada componente do sistema seja desenvolvido e testado de forma independente, facilitando a manutenção e o aprimoramento da aplicação como um todo.
+No contexto do sistema distribuído de pagamentos, o frontend foi implementado para fornecer uma interface amigável aos usuários, permitindo a visualização de informações relevantes, como saldos de contas, e outras funcionalidades relacionadas aos serviços financeiros.
 
 <lu>
-    <li><a href="#car">Car</a></li>
-    <li><a href="#carsystem">CarSystem</a></li>
-    <li><a href="#station">GasStation</a></li>
-    <li><a href="#fog">Fog</a></li>
-    <li><a href="#server">Server</a></li>
+    <li><a href="#bank">Bank</a></li>
+    <li><a href="#paxos">Paxos</a></li>
 	<li><a href="#front">Frontend</a></li>
 </lu>
 </div>
@@ -213,124 +204,7 @@ O controle da bateria e seu consumo ocorre em duas threads. Para criar o gasto d
 
 </div>
 	
-<div id="station">
 
-# Gas Station ⛽
-
-Este é um arquivo Python que implementa um dos postos de recarga de veículos elétricos no sistema de acompanhamento de filas em postos de recarregamento de carros elétricos. A aplicação utiliza a biblioteca Paho MQTT para se comunicar com o broker MQTT e publicar informações sobre as filas de recarregamento.
-
-## Funcionalidades 🚀
-
-O servidor tem as seguintes funcionalidades:
-
-- Publica a informação da fila de recarga do posto no tópico "station/queue/[client_id]" a cada 10 segundos.
-
-- Publica as coordenadas geográficas do posto no tópico "station/map/[client_id]" assim que estabelecida a área geográfica.
-## Bibliotecas utilizadas 📚
-
-- `paho.mqtt`: biblioteca para comunicação via MQTT com o broker.
-## Como executar 🛠️
-1. É necessário ter o Python e a biblioteca Paho MQTT instalados na máquina.
-
-```console
-python Station.py
-```
-
-2. Execute o arquivo Station.py através do terminal com o comando: python Station.py
-3. Siga as instruções para informar as coordenadas geográficas do posto.
-4. As informações da fila de recarga serão publicadas automaticamente a cada 10 segundos.
-
-## Como funciona 📝
-
-O arquivo Station.py é um módulo do sistema de acompanhamento de filas em postos de recarregamento de carros elétricos. Ele é responsável por gerar as informações de filas de um posto de recarga e publicá-las em um tópico do broker MQTT.
-
-A função connect_mqtt() é responsável por realizar a conexão com o broker MQTT, configurando o cliente com o ID, nome de usuário e senha fornecidos. A função também define a função de retorno on_connect() para imprimir uma mensagem informando se a conexão foi estabelecida com sucesso ou não.
-
-A função publish() recebe como entrada um cliente MQTT e as coordenadas do posto de recarga. A função publica as coordenadas em um tópico "station/map/{client_id}" para que a Fog possa visualizar a localização do posto de recarga em um mapa. A função também inicia um loop infinito em que envia, a cada 10 segundos, um número aleatório entre 0 e 10 que representa a quantidade de carros na fila do posto de recarga, para o tópico "station/queue/{client_id}".
-
-A função menu() é responsável por obter as coordenadas de localização do posto de recarga do usuário, que são usadas posteriormente para publicar a localização do posto de recarga no broker MQTT.
-
-Por fim, a função run() é responsável por chamar as funções anteriores na ordem correta para executar a funcionalidade do módulo. Ela chama a função menu() para obter as coordenadas de localização, em seguida chama a função connect_mqtt() para estabelecer a conexão com o broker MQTT e, por fim, chama a função publish() para enviar as informações de filas do posto de recarga para o broker MQTT.
-
-Dessa forma, o módulo Station.py permite a comunicação inteligente e em tempo real entre os postos de recarga de carros elétricos e a Fog, de modo que a Fog possa orientar os motoristas e distribuir a demanda entre os pontos, reduzindo o tempo necessário para a recarga dos veículos.
-
-</div>
-
-
-<div id ="fog">
-
-# Fog 🌫
-
-O Fog é uma aplicação que se conecta a um broker MQTT para obter informações sobre estações de recarga de carros elétricos e disponibiliza essas informações através de uma API REST. Através da API, é possível obter informações como a estação de recarga mais próxima, todas as estações disponíveis, suas posições geográficas e mais.
-
-## Funcionalidades 🚀
-
-A API REST disponibilizada pelo Fog possui as seguintes funcionalidades:
-
-- */lessQueue*: retorna a estação de recarga mais próxima, levando em consideração a distância e a fila de espera.
-- */station*s: retorna uma lista com todas as estações disponíveis.
-- */positions*: retorna uma lista com as posições geográficas de todas as estações disponíveis.
-- */allData*: retorna todas as informações disponíveis sobre as estações, como posição geográfica e fila de espera.
-
-## Bibliotecas utilizadas 📚
-
-O Fog utiliza as seguintes bibliotecas:
-
-- `paho.mqtt`: biblioteca para se conectar ao broker MQTT e receber mensagens.
-- `geopy.distance`: biblioteca para calcular a distância geográfica entre dois pontos.
-- `flask`: biblioteca para criar a API REST.
-- `flask_cors`: biblioteca para habilitar o CORS na API REST.
-
-## Como executar 🛠️
-
-1. Instale as dependências com o comando pip install -r requirements.txt.
-2. Edite o arquivo Fog.py e altere as constantes broker, port, username e password de acordo com as configurações do seu broker MQTT.
-3. Execute o comando python Fog.py para iniciar a aplicação. Será solicitado que informe a porta que a aplicação irá utilizar.
-
-## Como funciona 📝
-
-A parte de como funciona do código Fog.py é baseada em um modelo de arquitetura de Internet das Coisas (IoT) chamado de computação em nevoeiro (ou fog computing, em inglês). Essa arquitetura é uma extensão da computação em nuvem, porém com recursos mais próximos dos dispositivos finais, ou seja, mais próximos dos usuários ou das coisas conectadas.
-
-No caso específico deste código, a arquitetura fog computing é utilizada para fornecer informações em tempo real sobre estações de recarga de veículos elétricos. Para isso, a aplicação é dividida em dois módulos principais: um módulo de publicação de informações, representado por uma estação de recarga que publica informações em um servidor MQTT; e um módulo de consumo de informações, que é o responsável por receber e processar as informações publicadas pelas estações de recarga.
-
-O módulo de consumo é implementado pela aplicação Flask, que atua como um servidor web e expõe endpoints HTTP que podem ser acessados pelos usuários para consultar as informações das estações de recarga. A comunicação entre a aplicação Flask e as estações de recarga é feita por meio do protocolo MQTT, que é implementado pela biblioteca Paho MQTT.
-
-Para realizar o cálculo do tempo de chegada de um veículo elétrico a uma estação de recarga, é utilizada a biblioteca Geopy, que fornece funções para cálculos de distâncias entre coordenadas geográficas. Além disso, a aplicação também utiliza a biblioteca threading para executar os módulos de publicação e consumo de informações em threads separadas, garantindo que a aplicação seja capaz de lidar com múltiplas conexões simultâneas.
-
-Em resumo, o código Fog.py implementa uma arquitetura de computação em nevoeiro para fornecer informações em tempo real sobre estações de recarga de veículos elétricos. Ele utiliza o protocolo MQTT para a comunicação entre as estações de recarga e a aplicação Flask, e a biblioteca Geopy para calcular o tempo de chegada dos veículos elétricos às estações de recarga. A aplicação também é capaz de lidar com múltiplas conexões simultâneas, graças ao uso da biblioteca threading.
-
-</div>
-
-<div id ="server">
-
-# Server ☁
-
-O Server é um arquivo Dockerfile que tem como objetivo criar um container com a imagem do Mosquitto, um broker MQTT de código aberto. Ele é responsável por gerenciar as conexões entre os dispositivos IoT, como as estações de recarga e os carros elétricos, permitindo que eles troquem informações em tempo real.
-
-## Funcionalidades 🚀
-
-Criação de um container com a imagem do Mosquitto;
-Gerenciamento de conexões entre dispositivos IoT.
-
-## Bibliotecas utilizadas 📚
-
-Docker.
-
-## Como executar 🛠️
-
-1. Instale o Docker em sua máquina;
-2. No terminal, navegue até a pasta onde se encontra o arquivo Dockerfile;
-3. Execute o comando docker build -t mosquitto-image . para criar a imagem do Mosquitto;
-4. Em seguida, execute o comando docker run -p 1883:1883 mosquitto-image para criar o container com a imagem do Mosquitto.
-
-## Como funciona 📝
-
-O arquivo Dockerfile contém as instruções para criar um container com a imagem do Mosquitto. O Dockerfile inicia criando uma imagem base do sistema operacional Linux, adicionando em seguida os pacotes necessários para instalar e executar o Mosquitto. Em seguida, configura a porta padrão do Mosquitto (1883) e a porta de acesso ao protocolo WebSocket (9001). Por fim, são adicionados arquivos de configuração para o Mosquitto, permitindo a configuração do usuário e senha para acesso ao broker MQTT.
-
-Ao executar o comando docker build, o Docker cria a imagem do Mosquitto, contendo todas as configurações necessárias. Ao executar o comando docker run, é criado um container a partir da imagem previamente criada. Esse container é executado em segundo plano, mantendo o broker MQTT ativo e aguardando conexões entre os dispositivos IoT.
-
-Assim, o Server se torna essencial para o funcionamento da arquitetura do sistema, permitindo que os dispositivos IoT possam se conectar e trocar informações em tempo real através do broker MQTT.
-</div>
 
 <div id="front">
 
