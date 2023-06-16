@@ -441,35 +441,41 @@ Para executar o frontend, é necessário ter o Node.js instalado na máquina.
 # Considerações Finais
 O frontend do projeto foi desenvolvido com o intuito de oferecer uma experiência agradável e eficiente para os usuários que desejam realizar transações bancárias de forma prática e segura. A combinação das tecnologias React, Tailwind CSS e Chakra UI permite a criação de interfaces modernas e responsivas, além de facilitar o desenvolvimento e a manutenção do código.
 
-<div id="tela1" style="display: inline_block" align="center">
-    <img src="assets/Cad.png"/>
-		Tela de Cadastro
+<div id="tela1" style="display: block; text-align: center;">
+    <img src="assets/Cad.png" alt="Tela de Cadastro"/>
+    <p>Tela de Cadastro</p>
 </div>
-<div id="tela2" style="display: inline_block" align="center">
-    <img src="assets/Login.png"/>
-		Tela de Login
+
+<div id="tela2" style="display: block; text-align: center;">
+    <img src="assets/Login.png" alt="Tela de Login"/>
+    <p>Tela de Login</p>
 </div>
-<div id="tela3" style="display: inline_block" align="center">
-    <img src="assets/home.png"/>
-		Tela de Home
+
+<div id="tela3" style="display: block; text-align: center;">
+    <img src="assets/home.png" alt="Tela de Home"/>
+    <p>Tela de Home</p>
 </div>
-<div id="tela4" style="display: inline_block" align="center">
-    <img src="assets/dep.png"/>
-		Tela de Deposito
+
+<div id="tela4" style="display: block; text-align: center;">
+    <img src="assets/dep.png" alt="Tela de Depósito"/>
+    <p>Tela de Depósito</p>
 </div>
-<div id="tela5" style="display: inline_block" align="center">
-    <img src="assets/pag.png"/>
-		Tela de Pagamento
+
+<div id="tela5" style="display: block; text-align: center;">
+    <img src="assets/pag.png" alt="Tela de Pagamento"/>
+    <p>Tela de Pagamento</p>
 </div>
-<div id="tela6" style="display: inline_block" align="center">
-    <img src="assets/transIn.png"/>
-		Tela de Transaçaõ Interna
+
+<div id="tela6" style="display: block; text-align: center;">
+    <img src="assets/transIn.png" alt="Tela de Transação Interna"/>
+    <p>Tela de Transação Interna</p>
 </div>
-<div id="tela7" style="display: inline_block" align="center">
-    <img src="assets/transEx.png"/>
-		Tela de Transação Externa
+
+<div id="tela7" style="display: block; text-align: center;">
+    <img src="assets/transEx.png" alt="Tela de Transação Externa"/>
+    <p>Tela de Transação Externa</p>
 </div>
- 
+
 
 
 </div>
