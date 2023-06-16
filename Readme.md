@@ -1,54 +1,5 @@
-Formato /registerUser
-
-{
-    "cpf": 10000000000,
-    "type": "Conjunta",
-    "name1": "Pedro",
-    "email1": "pedro@gmail.com",
-    "password1": "12345",
-    "name2": "Maria",
-    "email2": "maria@gmail.com",
-    "password2": "12345"
-}
-
-Formato /signIn
-
-{
-    "cpf": 10000000000,
-    "email": "maria@gmail.com",
-    "password": "12345"
-}
-
-Formato /trasactionIn
-
-{
-    "cpf": 10000000000,
-    "cpfRec": 20000000000,
-    "value": 10
-}
-
-Formato /deposit
-
-{
-    "cpf": 10000000000,
-    "value": 10
-}
-
-Formato /trasactionEx
-
-{
-    "banks":[
-        ["bankA", 10000000000, "pedro@gmail.com", 12345, 10], 
-        ["bankB", 10000000000, "pedro@gmail.com", 12345, 20]
-    ]
-    "destiny": "bankC"
-    "cpf": 10000000000
-}
-
-
 
 <br>
-
 
 <div id="pt">
 
@@ -101,55 +52,318 @@ No contexto do sistema distribuído de pagamentos, o frontend foi implementado p
 
 <br>
 
-<div id="car">  
+<div id="bank">  
   
-# Car 🚗
+# Bank 🏦
+Este é um arquivo em Python que implementa um serviço de banco usando o framework Flask. O serviço fornece funcionalidades relacionadas a transações bancárias, registro de usuários e verificação de saldo.
 
-Este é um arquivo de uma classe em Python que representa o carro. Esta classe serve para simular qualquer periférico que o carro tenha para que o sistema funcione como: Um voltímetro de bateria, um velocímetro e um geolocalizador. 
+# Funcionalidades 🚀
+O serviço de banco possui as seguintes funcionalidades:
 
-## Funcionalidades 🚀
+Verificar saldo da conta
+Verificar se um saldo é válido para uma transação
+Registrar um novo usuário
+Realizar autenticação de usuário
+Realizar transações entre contas do mesmo banco
+Realizar transações entre bancos diferentes
 
-Essa classe tem as seguintes funcionalidades:
+# Bibliotecas utilizadas 📚
+ - Flask: Framework utilizado para criar o serviço web
+ - flask_cors: Utilizado para lidar com a política de mesma origem (CORS) no Flask
+ - json: Utilizado para trabalhar com dados JSON
+ - threading: Utilizado para criar threads e lidar com bloqueio
+ - requests: Utilizado para enviar solicitações HTTP para outros serviços/bancos
+ - time: Utilizado para pausar a execução do programa
 
-- Simular valores vindo de um velocímetro e de um geolocalizador
-	
-- Simular o consumo da bateria do carro podendo definir a seu grau de consumo
-	
-## Bibliotecas utilizadas 📚
-	
-- `geopy`: Utilização e operações com pontos em latitude e longitude
+# Como executar 🛠️
+1. Certifique-se de ter o Python instalado.
+2. Instale as bibliotecas necessárias executando o seguinte comando no terminal:
 
-## Como executar 🛠️
-
-1. Tenha o Python instalado com a biblioteca geopy, que pode ser instalada com o pip pelo comando:
 ```console
-pip install geopy
+pip install flask flask_cors
 ```
-2. Execute o arquivo Car.py através do terminal com o comando:
+
+3. Execute o arquivo bank.py através do terminal com o comando:
+
 ```console
-python Station.py
+python bank.py
 ```
-A execução desse arquivo tem apenas o propósito de testes isolados na classe ja que sua utilização é feita pelo arquivo CarSystem.py.
-	
-## Como funciona 📝
-	
-Essa classe representa o sistema do carro que é utilizado pelo nosso sistema, sintetizando eles em atributos e métodos. A classe contém como atributo:
-- battery: Que representa a porcentagem de bateria do carro, sempre iniciando em 100%;
-- batteryConsumption: Um valor entre 0 a 3 que representa o quanto de bateria o carro está gastando;
-- latitude e longitude: Representam as coordenadas do carro atualmente.
+O serviço de banco estará em execução na porta especificada.
+Você pode optar também por rodar a imagem docker que já estar configurada.
 
-O car.py também é composto por vários métodos. Além dos padrões métodos "Set's" e "Get's" temos métodos para controlar as simulação mais simples que a classe pretende ter, como:
-- lowerBatteryConsumption(): Método que reduz o consumo de energia até no mínimo de 0;
-- upBatteryConsumption(): Método que aumenta o consumo de energia até o máximo de 3;
-- consumeBattery(): Reduz a bateria em 20% vezes o valor do consumo de energia;
-- resetBattery(): Restaura o valor inicial da bateria;
-- isLowBattery(): Avalia se a bateria igual ou inferior a 20%, caso verdadeiro informa que a bateria está baixa.
+# Como usar 📝
+## Verificar saldo da conta
+Endpoint: /balance
 
-A classe ainda tem um último método que é o updateLocation que é mais complicado que os outros. Esse método tem como objetivo atualizar a localização do carro baseado no destino que ele pretende chegar, a sua velocidade atual e o tempo que ele vai andar. O cálculo da nova coordenada é feito calculando o inicialmente o tempo que o carro deve demorar para completar o seu destino, depois analisa quantos porcento desse destino ele irá andar com o tempo dado. Se a o tempo dado for menor que o tempo até o destino e calcular as coordenadas por uma regra de três, sado contrário a coordenada vai ser o destino.
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta
+Exemplo de solicitação:
+
+```json
+{
+  "cpf": "12345678910"
+}
+```
+Exemplo de resposta:
+
+```json
+{
+  "balance": 1000
+}
+```
+
+## Verificar se um saldo é válido para uma transação
+
+Endpoint: /balanceValid
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta
+value: Valor a ser verificado
+Exemplo de solicitação:
+
+```json
+{
+  "cpf": "12345678910",
+  "value": 500
+}
+```
+
+Exemplo de resposta:
+
+```json
+
+{
+  "success": true
+}
+```
+## Registrar um novo usuário
+Endpoint: /registerUser
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta
+type: Tipo de conta (ex: individual, conjunta)
+name1: Nome do titular
+email1: E-mail do titular
+password1: Senha do titular
+name2: Nome do segundo titular (opcional)
+email2: E-mail do segundo titular (opcional)
+password2: Senha do segundo titular (opcional)
+Exemplo de solicitação:
+
+```json
+
+{
+  "cpf": "12345678910",
+  "type": "conjunta",
+  "name1": "João",
+  "email1": "joao@example.com",
+  "password1": "senha123",
+  "name2": "Maria",
+  "email2": "maria@example.com",
+  "password2": "senha456"
+}
+```
+Exemplo de resposta:
+
+```json
+
+{
+  "success": true
+}
+```
+## Realizar autenticação de usuário
+Endpoint: /signIn
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta
+email: E-mail do titular
+password: Senha do titular
+Exemplo de solicitação:
+
+```json
+{
+  "cpf": "12345678910",
+  "email": "joao@example.com",
+  "password": "senha123"
+}
+```
+Exemplo de resposta (sucesso):
+
+```json
+{
+  "success": true
+}
+```
+Exemplo de resposta (falha):
+
+```json
+{
+  "success": false
+}
+```
+## Realizar transações entre contas do mesmo banco
+Endpoint: /transactionIn
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta de origem
+cpfRec: CPF do titular da conta de destino
+value: Valor a ser transferido
+Exemplo de solicitação:
+
+```json
+
+{
+  "cpf": "12345678910",
+  "cpfRec": "10987654321",
+  "value": 500
+}
+```
+Exemplo de resposta (sucesso):
+
+```json
+
+{
+  "success": true
+}
+```
+Exemplo de resposta (falha - saldo insuficiente):
+
+```json
+
+{
+  "success": false,
+  "error": "value insufficient"
+}
+```
+## Realizar transações entre bancos diferentes
+Endpoint: /transactionEx
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta de origem
+destiny: Banco de destino ("bankA", "bankB", "bankC")
+banks: Lista contendo as informações das contas de destino
+bank: Banco de destino ("bankA", "bankB", "bankC")
+cpf: CPF do titular da conta de destino
+value: Valor a ser transferido para a conta de destino
+Exemplo de solicitação:
+
+```json
+
+{
+  "cpf": "12345678910",
+  "destiny": "bankA",
+  "banks": [
+    [
+       "bankA",
+       "10987654321",
+       300
+    ],
+    [
+      "bankB",
+      "98765432109",
+       200
+    ]
+  ]
+}
+```
+Exemplo de resposta (sucesso):
+
+```json
+
+{
+  "success": true
+}
+```
+Exemplo de resposta (falha - saldo insuficiente):
+
+```json
+
+{
+  "success": false,
+  "error": "value insufficient"
+}
+```
+## Realizar um depósito na conta
+Endpoint: /deposit
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta
+value: Valor a ser depositado
+Exemplo de solicitação:
+
+```json
+
+{
+  "cpf": "12345678910",
+  "value": 200
+}
+```
+Exemplo de resposta:
+
+```json
+
+{
+  "success": true
+}
+```
+## Realizar um pagamento
+Endpoint: /payment
+
+Método: POST
+
+Parâmetros:
+
+cpf: CPF do titular da conta
+value: Valor a ser pago
+Exemplo de solicitação:
+
+```json
+
+{
+  "cpf": "12345678910",
+  "value": 100
+}
+```
+Exemplo de resposta (sucesso):
+
+```json
+
+{
+  "success": true
+}
+```
+Exemplo de resposta (falha - saldo insuficiente):
+
+```json
+
+{
+  "success": false,
+  "error": "value insufficient"
+}
+```
 	
 </div>
-
-<div id="carsystem">
 
 <div id="carsystem">
 
