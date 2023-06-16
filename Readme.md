@@ -365,56 +365,39 @@ Exemplo de resposta (falha - saldo insuficiente):
 	
 </div>
 
-<div id="carsystem">
+<div id="paxos">
 
-# CarSystem 📱
+# PaxosWithVectorClocks ⏰
+O código PaxosWithVectorClocks implementa um algoritmo de consenso chamado Paxos com relógios vetoriais. Ele é usado para garantir a consistência em sistemas distribuídos, permitindo que os processos concordem em um valor comum, mesmo em face de falhas e latência na comunicação entre os processos.
 
-Esse arquivo Python que instancia um objeto da classe Car e cria um controlador para o mesmo fazendo a integração do veículo com o nosso sistema avaliando a bateria do carro, atualizando a sua posição e quando necessário requisitando ao servidor o melhor posto para recarga via API REST.
-	
-## Funcionalidades 🚀
+# Funcionalidades 🚀
+O código possui as seguintes funcionalidades:
 
-Esse controlador tem as seguintes funcionalidades:
-	
-- Controlar o consumo de bateria do seu Car;
-- Avaliar o nível da bateria;
-- Requisitar o melhor posto para recarga de bateria quando a mesma estiver baixa;
-- Simular o movimento do carro.
-	
-## Bibliotecas utilizadas 📚
+- Propor um valor para o consenso.
+- Adicionar um novo processo ao sistema.
+- Enviar mensagens entre os processos.
+- Preparar a proposta e obter respostas de promessas dos demais processos.
+- Aceitar uma proposta e obter respostas de aceitação dos demais processos.
+- Aprender o valor aceito pelo consenso.
 
-- `geopy.distance`: biblioteca para calcular a distância geográfica entre dois pontos;
-- `requests`: biblioteca fazer requisições HTTP para uma API.
-	
-## Como executar 🛠️
-	
-1. É necessário ter o Python e a biblioteca requests e geopy.distance instalados na máquina, podendo ambos serem instaladas com o pip da seguinte forma:
-	
-```console
-pip install requests
-pip install geopy
-```
+### Método propose(process_id, value)
+Este método é usado para propor um valor ao sistema. Ele recebe como entrada o ID do processo proponente e o valor a ser proposto. O algoritmo utiliza uma abordagem de tentativa e erro, onde gera um número de proposta e tenta alcançar um consenso por meio das fases de preparação e aceitação. O método retorna o valor aceito pelo consenso ou None se não houver consenso alcançado após um número máximo de tentativas.
 
-2. Execute o arquivo CarSystem.py através do terminal com o comando:
-	
-```console
-python CarSystem.py
-```	
-	
-3. O arquivo vai criar um objeto Car informando seus dados iniciais e suas alterações, além de poder aumentar ou diminuir o consumo da bateria manualmente direto pelo terminal.
-	
-## Como funciona 📝
-	
-O Arquivo CarSystem é um módulo do sistema que instancia e controla um carro na rede. Ele é responsável por acompanhar a situação atual do carro para, quando necessário, solicitar ao servidor mais próximo o melhor posto para recarga. Para monitorar o carro dessa forma ela utiliza-se de alguns métodos para esse controle, os quais são executados em threads diferentes para que o monitoramento não seja dependente de outras funcionalidades.
-	
-Ao ser executado o CarSystem demonstra os dados iniciais do carro e depois informa o caminhar da bateria. Inicialmente ele mostra no terminal a velocidade do carro, seu consumo inicial de bateria e sua posição inicial, a medida que passa o tempo ele vai informando a bateria atual do carro a cada 10 segundos.
-	
-O monitoramento da bateria ocorre através da thread avaliableBatteryThread que executa o método avaliableBattery. Ao ser executado o  CarSystem começa a perguntar para o seu Car se a bateria está baixa e, caso esteja, solicita ao servidor qual posto mais próximo para a recarga. Com o recebimento correto do posto, é informado pelo terminal qual o posto encontrado, sua localização e o tamanho atual de sua fila e pausa a sua verificação da bateria até ela sair do nível baixo.
+### Método add_process(process_id)
+Este método é utilizado para adicionar um novo processo ao sistema. Ele recebe como entrada o ID do novo processo a ser adicionado.
 
-Como o sistema é um protótipo o CarSystem faz outras atividades para a simulação ocorrer da melhor forma. O módulo controla algumas modificações dos estados do carro em threads diferentes para não influenciar no próprio monitoramento. As modificações que ele proporciona e no deslocamento do carro, o consumo de bateria e o quanto de bateria o carro vai consumir.
+### Método send_message(sender_id, receiver_id, message)
+Este método é utilizado para enviar uma mensagem de um processo remetente para um processo destinatário. Ele recebe o ID do processo remetente, o ID do processo destinatário e a mensagem a ser enviada.
 
-Para o deslocamento do carro, o CarSystem cria uma thread para executar o método carInMoviment. O método é um loop que aleatoriza um destino para o Car dentro de uma região predeterminada e pede para ele se movimentar para esse destino por 6 min usando o método updateLocation e, assim que o carro chegue nesse ponto, ele cria um novo destino.
-	
-O controle da bateria e seu consumo ocorre em duas threads. Para criar o gasto de bateria é criada a thread consumeBetteryThread que usando o método consumeBattery do seu Car para consumir a bateria a cada 5 segundos. Já o controle do consumo é feito pela thread batteryConsumptionThead que informa que para aumentar ou diminuir o consumo de bateria o usuário deve digitar + ou - respectivamente para assim modificar o consumo de bateria.
+### Método prepare(proposal_number)
+Este método é responsável pela fase de preparação do algoritmo Paxos. Ele gera uma mensagem de preparação com o número de proposta atual e o relógio vetorial atual, e envia essa mensagem para todos os outros processos. Em seguida, aguarda as respostas de promessa dos demais processos. Se receber promessas suficientes, atualiza o relógio vetorial com os valores máximos recebidos e retorna True. Caso contrário, retorna False.
+
+### Método accept(proposal_number, value)
+Este método é responsável pela fase de aceitação do algoritmo Paxos. Ele gera uma mensagem de aceitação com o número de proposta e o valor a ser aceito, e envia essa mensagem para todos os outros processos. Em seguida, aguarda as respostas de aceitação dos demais processos. Se receber aceitações suficientes, atualiza o relógio vetorial com os valores máximos recebidos e retorna o valor aceito pelo consenso. Caso contrário, retorna None.
+
+### Método learn(accepted_value)
+Este método é chamado quando um valor é aceito pelo consenso. Ele atualiza o valor aceito no objeto PaxosWithVectorClocks e envia uma mensagem de aprendizado para os demais processos, informando o valor aceito.
+
 
 </div>
 	
@@ -424,26 +407,27 @@ O controle da bateria e seu consumo ocorre em duas threads. Para criar o gasto d
 
 # Frontend 👨‍💻
 
-A Interface é o componente principal do frontend, que apresenta um mapa com marcadores de pontos e um marcador móvel que representa o veículo. A funcionalidade do frontend aqui apresentada não foi solicitada, mas foi adicionada para uma melhor visualização do sistema de localização de scooters. Como essa funcionalidade foi adicionada ao projeto após a definição dos requisitos, ela não foi implementada da forma mais otimizada e pode conter algumas limitações.
-
-O frontend do sistema de localização de scooters é uma aplicação web desenvolvida em React com TypeScript. Ele é responsável por mostrar no mapa a localização atual das scooters e o estado da bateria de cada uma delas.
-
-O mapa utilizado é fornecido pelo OpenStreetMap e é renderizado utilizando a biblioteca Leaflet. O frontend consome os dados do servidor por meio de requisições HTTP utilizando a biblioteca Axios.
-
-O código do frontend foi desenvolvido com o objetivo de fornecer uma interface amigável e intuitiva para o usuário final. No entanto, devido às limitações de tempo, ele não foi implementado da forma mais otimizada e pode conter algumas limitações.
+O frontend do projeto consiste em uma aplicação web desenvolvida utilizando a biblioteca React, combinada com o framework de estilização Tailwind CSS e a biblioteca de componentes Chakra UI. O objetivo principal desse frontend é fornecer uma interface intuitiva e responsiva para os usuários interagirem com as funcionalidades relacionadas a transações bancárias.
 
 ## Funcionalidades 🚀
 
-- Renderização de um mapa com a biblioteca Leaflet
-- Atualização da localização do marcador móvel com base em dados recebidos do servidor
-- Atualização dos marcadores de pontos com base em dados recebidos do servidor
-- Verificação do nível de bateria e troca da estação de recarga, quando necessário.
+O frontend é composto por sete páginas principais, cada uma com sua respectiva finalidade:
+
+- Login: Página de autenticação, onde os usuários podem realizar o login em suas contas bancárias.
+- SignUp: Página de cadastro, onde novos usuários podem criar uma conta bancária.
+- Home: Página inicial após o login, que exibe informações resumidas da conta do usuário e oferece acesso rápido às demais funcionalidades.
+- Deposit: Página para realizar depósitos em conta, permitindo que os usuários insiram valores e efetuem a transação.
+- Payment: Página para realizar pagamentos, onde os usuários podem inserir os dados do destinatário e o valor a ser transferido.
+- TransEx: Página de transferências externas, que possibilita aos usuários realizar transferências para contas de outros bancos.
+- TransIn: Página de transferências internas, permitindo que os usuários realizem transferências entre contas do mesmo banco.
 
 ## Bibliotecas utilizadas 📚
 
-- React
-- Leaflet
-- Axios
+Para facilitar o desenvolvimento e melhorar a experiência do usuário, foram utilizadas as seguintes bibliotecas:
+
+- React: Uma biblioteca JavaScript popular para a criação de interfaces de usuário interativas e reativas.
+- Tailwind CSS: Um framework de estilização que utiliza classes utilitárias para facilitar a construção de interfaces responsivas e customizáveis.
+- Chakra UI: Uma biblioteca de componentes para React que fornece uma ampla variedade de elementos de interface prontos para uso, seguindo boas práticas de design e acessibilidade.
 
 ## Como executar 🛠️
 
@@ -454,30 +438,14 @@ Para executar o frontend, é necessário ter o Node.js instalado na máquina.
 3. Execute o comando npm run dev para iniciar o servidor local.
 4. Acesse a URL http://localhost:5173/ no navegador para visualizar o frontend.
 
-## Como funciona 📝
-
-O componente Interface utiliza a biblioteca Leaflet para renderizar um mapa e adicionar marcadores de pontos e um marcador móvel que representa o veículo. O estado data é inicializado como um array vazio que é atualizado através de uma requisição HTTP utilizando a biblioteca Axios. Os marcadores de pontos são adicionados ao mapa através do useEffect, que é disparado sempre que o estado data é atualizado.
-
-A localização do marcador móvel é definida pelo estado coords, que é atualizado a cada 3 segundos através de um intervalo definido pelo setInterval. O nível de bateria é definido pelo estado batery e atualizado pela função baterylow, que é executada no intervalo definido pelo setInterval. Quando o nível de bateria atinge um valor abaixo de 50%, a função getStation é chamada para encontrar a estação de recarga mais próxima e atualizar a posição do marcador móvel. Isso é feito através de uma requisição HTTP utilizando a biblioteca Axios.
-
-O componente utiliza a biblioteca useRef para armazenar uma referência ao marcador móvel, e o useEffect é utilizado para atualizar a posição do marcador móvel sempre que o estado coords é atualizado.
-
-O componente Interface é exportado como um módulo para ser utilizado em outros componentes do frontend.
+# Considerações Finais
+O frontend do projeto foi desenvolvido com o intuito de oferecer uma experiência agradável e eficiente para os usuários que desejam realizar transações bancárias de forma prática e segura. A combinação das tecnologias React, Tailwind CSS e Chakra UI permite a criação de interfaces modernas e responsivas, além de facilitar o desenvolvimento e a manutenção do código.
 
 <div id="mapa1" style="display: inline_block" align="center">
-		<img src="assets/mapa1.png"/>
 		Mapa com um posto (verde) o carro utilizando a interface (vermelho) e as 3 nevoas (azul).
 </div>
  
-<div id="mapa1" style="display: inline_block" align="center">
-		<img src="assets/mapa2.png"/>
-		Mapa com o carro indo abastecer no posto.
-</div>
 
-<div id="mapa1" style="display: inline_block" align="center">
-		<img src="assets/mapa3.png"/>
-		Mapa com vários postos.
-</div>
 
 </div>
 
@@ -521,15 +489,15 @@ Com esses comandos, é possível gerar e executar as imagens das aplicações em
 # Conclusão 🏁
 
 
-Neste projeto, desenvolvemos uma solução para monitoramento de baterias de veículos elétricos utilizando a tecnologia de Internet das Coisas (IoT). Para isso, utilizamos o protocolo MQTT para a comunicação entre os dispositivos e o broker, além do Docker para garantir a portabilidade e escalabilidade da solução.
+Neste projeto, desenvolvemos uma solução que consiste em um frontend em React com Tailwind CSS, responsável por proporcionar uma interface amigável e intuitiva para os usuários, com 7 páginas distintas: Login, SignUp, Home, Deposit, Payment, TransEx e TransIn. Através dessas páginas, os usuários podem se conectar à API dos bancos e realizar as transações financeiras necessárias, como pagamentos, depósitos e transferências.
 
-Na parte do backend, desenvolvemos uma API RESTful em Python utilizando o framework Flask para receber as informações enviadas pelos dispositivos e armazená-las em um banco de dados MongoDB. Utilizamos também o serviço de cloud da Amazon Web Services (AWS) para hospedar a aplicação em uma instância EC2.
+Para garantir a comunicação eficiente entre o frontend e a API, utilizamos a biblioteca Axios, que simplifica as requisições HTTP. Além disso, para aprimorar a interface do usuário, integramos a biblioteca Chakra UI, que fornece componentes estilizados e personalizáveis para uma experiência visual mais agradável.
 
-Na parte do frontend, implementamos uma interface gráfica em React com TypeScript para visualizar a localização dos veículos e o nível de bateria em tempo real. Adicionamos a biblioteca Leaflet para a criação do mapa e a biblioteca axios para realizar as requisições HTTP à API.
+No que diz respeito ao backend, o projeto conta com a implementação dos componentes "paxos" e "bank". O componente "paxos" é responsável por implementar o protocolo de consenso Paxos, garantindo que os servidores cheguem a um acordo sobre os valores propostos, mesmo em situações de falhas ou atrasos na comunicação. Já o componente "bank" lida com as operações bancárias, como pagamentos, depósitos e transferências entre contas bancárias. Essa implementação visa garantir a consistência e a integridade das transações financeiras distribuídas.
 
-Apesar de ter atendido aos requisitos iniciais do projeto, a funcionalidade de frontend não foi solicitada e foi adicionada posteriormente para melhor visualização do sistema. Por isso, não foi implementada de forma otimizada e pode ser aprimorada em futuras versões.
+Outro aspecto importante do projeto é a sua containerização utilizando o Docker. Essa abordagem permite empacotar o frontend, o backend e todas as dependências em contêineres isolados, garantindo a portabilidade e a escalabilidade da solução. Com o Docker, é possível implantar e executar o sistema em diferentes ambientes de forma consistente e eficiente.
 
-Em resumo, este projeto apresenta uma solução funcional para monitoramento de baterias de veículos elétricos utilizando IoT e MQTT, com um backend em Python e um frontend em React. A utilização de tecnologias como Docker e AWS garante a escalabilidade e portabilidade da solução, permitindo que ela seja facilmente adaptada a diferentes cenários e necessidades.
+Em conclusão, o projeto foi bem-sucedido ao fornecer uma solução funcional e eficiente para a realização de transações financeiras distribuídas. O frontend em React, combinado com o Tailwind CSS e a biblioteca Chakra UI, proporciona uma interface amigável e intuitiva para os usuários. A integração do Axios com a API dos bancos permite a comunicação eficiente entre o frontend e o backend. Além disso, a implementação dos componentes "paxos" e "bank" assegura a consistência e a integridade das transações financeiras. A containerização do projeto utilizando o Docker adiciona portabilidade e escalabilidade, facilitando sua implantação em diferentes ambientes.
 </div>
 
 </div>
