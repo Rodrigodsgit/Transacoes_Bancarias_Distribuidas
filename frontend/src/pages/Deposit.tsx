@@ -13,7 +13,7 @@ export function Deposit() {
         try {
           axios({
             method: 'post',
-            url: `http://127.0.0.1:5001/deposit`,
+            url: `http://172.16.103.3:5001/deposit`,
             data:{
               cpf: localStorage.getItem("cpf"),
               value: value

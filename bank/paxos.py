@@ -19,7 +19,7 @@ class PaxosWithVectorClocks:
                     return accepted_value
             proposal_number[process_id] += 1
         
-        return False 
+        return None 
 
     def add_process(self, process_id):
         self.processes[process_id] = {'messages': []}

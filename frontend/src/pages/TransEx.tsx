@@ -20,7 +20,7 @@ export function TransEx() {
         const email = localStorage.getItem("email");
         const password = localStorage.getItem("password");
     
-        const response = await axios.post('http://127.0.0.1:5001/transactionEx', {
+        const response = await axios.post('http://172.16.103.3:5001/transactionEx', {
           banks: [
             [firstBank, cpfOwner, email, password, firstValue],
             [secondBank, cpfOwner, email, password, secondValue]

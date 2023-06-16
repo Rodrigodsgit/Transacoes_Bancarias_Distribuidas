@@ -11,7 +11,7 @@ export function Payment() {
     async function handleSignIn(event: FormEvent) {
       event.preventDefault();
       try {
-        const response = await axios.post('http://127.0.0.1:5001/payment', {
+        const response = await axios.post('http://172.16.103.3:5001/payment', {
           cpf: localStorage.getItem("cpf"),
           value: value
         });
