@@ -441,8 +441,33 @@ Para executar o frontend, é necessário ter o Node.js instalado na máquina.
 # Considerações Finais
 O frontend do projeto foi desenvolvido com o intuito de oferecer uma experiência agradável e eficiente para os usuários que desejam realizar transações bancárias de forma prática e segura. A combinação das tecnologias React, Tailwind CSS e Chakra UI permite a criação de interfaces modernas e responsivas, além de facilitar o desenvolvimento e a manutenção do código.
 
-<div id="mapa1" style="display: inline_block" align="center">
-		Mapa com um posto (verde) o carro utilizando a interface (vermelho) e as 3 nevoas (azul).
+<div id="tela1" style="display: inline_block" align="center">
+    <img src="assets/Cad.png"/>
+		Tela de Cadastro
+</div>
+<div id="tela2" style="display: inline_block" align="center">
+    <img src="assets/Login.png"/>
+		Tela de Login
+</div>
+<div id="tela3" style="display: inline_block" align="center">
+    <img src="assets/home.png"/>
+		Tela de Home
+</div>
+<div id="tela4" style="display: inline_block" align="center">
+    <img src="assets/dep.png"/>
+		Tela de Deposito
+</div>
+<div id="tela5" style="display: inline_block" align="center">
+    <img src="assets/pag.png"/>
+		Tela de Pagamento
+</div>
+<div id="tela6" style="display: inline_block" align="center">
+    <img src="assets/transIn.png"/>
+		Tela de Transaçaõ Interna
+</div>
+<div id="tela7" style="display: inline_block" align="center">
+    <img src="assets/transEx.png"/>
+		Tela de Transação Externa
 </div>
  
 

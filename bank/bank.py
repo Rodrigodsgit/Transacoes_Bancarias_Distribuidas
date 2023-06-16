@@ -15,9 +15,9 @@ data = {}
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 session = [
-    "http://172.16.103.3:5001",
-    "http://172.16.103.4:5002",
-    "http://172.16.103.5:5003"
+    "http://127.0.0.1:5001",
+    "http://127.0.0.1:5002",
+    "http://127.0.0.1:5003"
 ]
 bloqueio_por_id = {}
 
